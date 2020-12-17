@@ -5,6 +5,8 @@ var plateau;
 var nbImgChargees = 0;
 var img = [];
 var selection = false;
+const PION = 0;
+const TOUR = 4;
 
 function chargeImages() {
     var i = 0;
@@ -24,7 +26,10 @@ function chargeImages() {
 
 function onImgLoad() {
     nbImgChargees++;
-    if (nbImgChargees == 4) drawBoard(size, plateau);
+    if (nbImgChargees == 4) {
+        initialise();
+        drawBoard(size, plateau);
+    }
 }
 
 function drawCase(Case) {
@@ -119,9 +124,10 @@ function initPlateau() {
         currentNoir = !currentNoir;
     }
     for (var c = 0; c < 8; c++) {
-        plateau[1][c].piece = new Piece(0, true);
-        plateau[6][c].piece = new Piece(0, false);
+        plateau[1][c].piece = new Piece(PION, true);
+        plateau[6][c].piece = new Piece(PION, false);
     }
+    //plateau[0][0].piece = new Piece(TOUR, true);
     return plateau;
 }
 
@@ -130,7 +136,8 @@ function initialise() {
     var rect = canvas.getBoundingClientRect();
     size = Math.floor(rect.width / 8);
     context = canvas.getContext('2d');
-    chargeImages();
     plateau = initPlateau();
     canvas.addEventListener('click', onClick, false);
 }
+
+chargeImages();
