@@ -8,6 +8,10 @@ var selection = false;
 const VISEUR = 0;
 const PION = 1;
 const TOUR = 2;
+const ROI = 3;
+const FOU = 4;
+const CHEVAL = 5;
+const REINE = 6;
 let imageCount = 0;
 
 function chargeImage(fileName) {
@@ -19,10 +23,18 @@ function chargeImage(fileName) {
 function chargeImages() {
     chargeImage("viseur_noir.svg");
     chargeImage("viseur_blanc.svg");
-    chargeImage("pion_noir2.svg");
-    chargeImage("pion_blanc2.svg");
-    chargeImage("tour_noir.svg");
-    chargeImage("tour_blanc.svg");
+    chargeImage("Chess_pdt45.svg");
+    chargeImage("Chess_plt45.svg");
+    chargeImage("Chess_rdt45.svg");
+    chargeImage("Chess_rlt45.svg");
+    chargeImage("Chess_kdt45.svg");
+    chargeImage("Chess_klt45.svg");
+    chargeImage("Chess_bdt45.svg");
+    chargeImage("Chess_blt45.svg");
+    chargeImage("Chess_ndt45.svg");
+    chargeImage("Chess_nlt45.svg");
+    chargeImage("Chess_qdt45.svg");
+    chargeImage("Chess_qlt45.svg");
 }
 
 function onImgLoad() {
@@ -36,7 +48,7 @@ function onImgLoad() {
 
 function drawCase(Case) {
     if (Case.noir) {
-        context.fillStyle = 'black';
+        context.fillStyle = 'grey';
     } else {
         context.fillStyle = 'white';
     }
@@ -130,8 +142,20 @@ function initPlateau() {
         plateau[6][c].piece = new Piece(PION, false);
     }
     plateau[0][0].piece = new Piece(TOUR, true);
+    plateau[0][1].piece = new Piece(CHEVAL, true);
+    plateau[0][2].piece = new Piece(FOU, true);
+    plateau[0][3].piece = new Piece(REINE, true);
+    plateau[0][4].piece = new Piece(ROI, true);
+    plateau[0][5].piece = new Piece(FOU, true);
+    plateau[0][6].piece = new Piece(CHEVAL, true);
     plateau[0][7].piece = new Piece(TOUR, true);
     plateau[7][0].piece = new Piece(TOUR, false);
+    plateau[7][1].piece = new Piece(CHEVAL, false);
+    plateau[7][2].piece = new Piece(FOU, false);
+    plateau[7][3].piece = new Piece(REINE, false);
+    plateau[7][4].piece = new Piece(ROI, false);
+    plateau[7][5].piece = new Piece(FOU, false);
+    plateau[7][6].piece = new Piece(CHEVAL, false);
     plateau[7][7].piece = new Piece(TOUR, false);
     return plateau;
 }
