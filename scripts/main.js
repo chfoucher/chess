@@ -5,23 +5,24 @@ var plateau;
 var nbImgChargees = 0;
 var img = [];
 var selection = false;
-const PION = 0;
-const TOUR = 4;
+const VISEUR = 0;
+const PION = 1;
+const TOUR = 2;
 let imageCount = 0;
 
+function chargeImage(fileName) {
+    img[imageCount] = new Image();
+    img[imageCount].onload = onImgLoad;
+    img[imageCount++].src = "images/" + fileName;
+}
+
 function chargeImages() {
-    img[imageCount] = new Image();
-    img[imageCount].onload = onImgLoad;
-    img[imageCount++].src = "images/pion_noir2.svg";
-    img[imageCount] = new Image();
-    img[imageCount].onload = onImgLoad;
-    img[imageCount++].src = "images/pion_blanc2.svg";
-    img[imageCount] = new Image();
-    img[imageCount].onload = onImgLoad;
-    img[imageCount++].src = "images/viseur_noir.svg";
-    img[imageCount] = new Image();
-    img[imageCount].onload = onImgLoad;
-    img[imageCount++].src = "images/viseur_blanc.svg";
+    chargeImage("viseur_noir.svg");
+    chargeImage("viseur_blanc.svg");
+    chargeImage("pion_noir2.svg");
+    chargeImage("pion_blanc2.svg");
+    chargeImage("tour_noir.svg");
+    chargeImage("tour_blanc.svg");
 }
 
 function onImgLoad() {
@@ -91,14 +92,14 @@ function onClick(evt) {
 }
 
 function drawPiece(p, r, c) {
-    if (p.noir) id = 0;
-    else id = 1;
+    if (p.noir) id = 2 * p.type;
+    else id = 2 * p.type + 1;
     context.drawImage(img[id], c * size, r * size, size * 0.95, size * 0.95);
 }
 
 function drawSelection(r, c) {
-    if (plateau[r][c].noir) id = 3;
-    else id = 2;
+    if (plateau[r][c].noir) id = 2 * VISEUR + 1;
+    else id = 2 * VISEUR;
     context.drawImage(img[id], c * size, r * size, size * 0.95, size * 0.95);
 }
 
@@ -128,7 +129,10 @@ function initPlateau() {
         plateau[1][c].piece = new Piece(PION, true);
         plateau[6][c].piece = new Piece(PION, false);
     }
-    //plateau[0][0].piece = new Piece(TOUR, true);
+    plateau[0][0].piece = new Piece(TOUR, true);
+    plateau[0][7].piece = new Piece(TOUR, true);
+    plateau[7][0].piece = new Piece(TOUR, false);
+    plateau[7][7].piece = new Piece(TOUR, false);
     return plateau;
 }
 
