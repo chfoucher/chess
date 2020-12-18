@@ -7,28 +7,29 @@ var img = [];
 var selection = false;
 const PION = 0;
 const TOUR = 4;
+let imageCount = 0;
 
 function chargeImages() {
-    var i = 0;
-    img[i] = new Image();
-    img[i].onload = onImgLoad;
-    img[i++].src = "images/pion_noir2.svg";
-    img[i] = new Image();
-    img[i].onload = onImgLoad;
-    img[i++].src = "images/pion_blanc2.svg";
-    img[i] = new Image();
-    img[i].onload = onImgLoad;
-    img[i++].src = "images/viseur_noir.svg";
-    img[i] = new Image();
-    img[i].onload = onImgLoad;
-    img[i++].src = "images/viseur_blanc.svg";
+    img[imageCount] = new Image();
+    img[imageCount].onload = onImgLoad;
+    img[imageCount++].src = "images/pion_noir2.svg";
+    img[imageCount] = new Image();
+    img[imageCount].onload = onImgLoad;
+    img[imageCount++].src = "images/pion_blanc2.svg";
+    img[imageCount] = new Image();
+    img[imageCount].onload = onImgLoad;
+    img[imageCount++].src = "images/viseur_noir.svg";
+    img[imageCount] = new Image();
+    img[imageCount].onload = onImgLoad;
+    img[imageCount++].src = "images/viseur_blanc.svg";
 }
 
 function onImgLoad() {
     nbImgChargees++;
-    if (nbImgChargees == 4) {
+    if (nbImgChargees == imageCount) {
         initialise();
         drawBoard(size, plateau);
+        showMessage("S√©lectionne une pi√®ce");
     }
 }
 
@@ -39,7 +40,7 @@ function drawCase(Case) {
         context.fillStyle = 'white';
     }
     context.fillRect(Case.c * size, Case.r * size, size, size);
-    if (Case.piece != 0) drawPiece(Case.piece, Case.r, Case.c)
+    if (Case.piece) drawPiece(Case.piece, Case.r, Case.c)
 }
 
 function drawBoard(size, plateau) {
@@ -70,22 +71,23 @@ function getPointedSquare(canvas, evt) {
 }
 
 function onClick(evt) {
-    console.log("onClick");
     var mousePos = getPointedSquare(canvas, evt);
     var message;
     if (selection) {
         plateau[mousePos.y][mousePos.x].piece = selection.piece;
-        selection.piece = 0;
+        selection.piece = null;
         drawCase(selection);
         drawCase(plateau[mousePos.y][mousePos.x]);
-        selection = false;
-        message = "SÈlectionne une piËce";
+        selection = null;
+        showMessage("S√©lectionne une pi√®ce");
     } else {
-        selection = plateau[mousePos.y][mousePos.x];
-        drawSelection(mousePos.y,  mousePos.x);
-        message = "SÈlectionne la destination";
+        const position = plateau[mousePos.y][mousePos.x]; 
+        if (position.piece) {
+            selection = position;
+            drawSelection(mousePos.y,  mousePos.x);
+            showMessage("S√©lectionne la destination");
+        }
     }
-    showMessage(message);
 }
 
 function drawPiece(p, r, c) {
@@ -104,7 +106,6 @@ function Case(r, c, noir) {
     this.r = r;
     this.c = c;
     this.noir = noir;
-    this.piece = 0;
 }
 
 function Piece(type, noir) {
