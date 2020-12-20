@@ -77,27 +77,26 @@ function getMousePos(canvas, evt) {
 }
 
 function getPointedSquare(canvas, evt) {
-    var mousePos = getMousePos(canvas, evt);
-    mousePos.x = Math.floor(mousePos.x /size);
-    mousePos.y = Math.floor(mousePos.y / size);
-    return mousePos;
+    const mousePos = getMousePos(canvas, evt);
+    return {c: Math.floor(mousePos.x /size), r:Math.floor(mousePos.y / size)};
 }
 
 function onClick(evt) {
-    var mousePos = getPointedSquare(canvas, evt);
-    var message;
+    const destination = getPointedSquare(canvas, evt);
     if (selection) {
-        plateau[mousePos.y][mousePos.x].piece = selection.piece;
-        selection.piece = null;
-        drawCase(selection);
-        drawCase(plateau[mousePos.y][mousePos.x]);
+        plateau[destination.r][destination.c].piece = selection.piece;
+        drawCase(plateau[destination.r][destination.c]);
+        if ((destination.c != selection.c) || (destination.r != selection.r)) {
+            selection.piece = null;
+            drawCase(selection);
+        }
         selection = null;
         showMessage("Sélectionne une pièce");
     } else {
-        const position = plateau[mousePos.y][mousePos.x]; 
+        const position = plateau[destination.r][destination.c]; 
         if (position.piece) {
             selection = position;
-            drawSelection(mousePos.y,  mousePos.x);
+            drawSelection(destination.r,  destination.c);
             showMessage("Sélectionne la destination");
         }
     }
