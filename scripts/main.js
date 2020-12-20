@@ -163,11 +163,10 @@ function initialise() {
     canvas = document.getElementById('myCanvas');
     let length = window.innerHeight;
     if (length > window.innerWidth) length = window.innerWidth;
-    length = 0.9 * length;
+    length = Math.floor(0.9 * length);
     canvas.width = length;
     canvas.height = length;
-    var rect = canvas.getBoundingClientRect();
-    size = Math.floor(rect.width / 8);
+    size = Math.floor(canvas.width / 8);
     context = canvas.getContext('2d');
     plateau = initPlateau();
     canvas.addEventListener('click', onClick, false);
