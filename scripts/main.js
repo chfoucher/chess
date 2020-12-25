@@ -101,7 +101,7 @@ function onClick(evt) {
         }
         selection = null;
     } else {
-        if (caseChoisie.piece) {
+        if (caseChoisie.piece && (leBlancJoue === !caseChoisie.piece.noir)) {
             selection = caseChoisie;
             drawSelection(r, c);
         }
