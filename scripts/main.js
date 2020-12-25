@@ -13,6 +13,7 @@ const FOU = 4;
 const CHEVAL = 5;
 const REINE = 6;
 let imageCount = 0;
+let leBlancJoue = true;
 
 function chargeImage(fileName) {
     img[imageCount] = new Image();
@@ -68,6 +69,15 @@ function showMessage(message) {
     messageBlock.innerText = message;
 }
 
+function showStatus() {
+    if (selection) {
+        showMessage("Sélectionne la destination");
+    } else {
+        const joueur = leBlancJoue?"blancs":"noirs";
+        showMessage(`Aux ${joueur} de jouer`);
+    }
+}
+
 function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
@@ -91,14 +101,15 @@ function onClick(evt) {
             drawCase(selection);
         }
         selection = null;
-        showMessage("Sélectionne une pièce");
+        leBlancJoue = !leBlancJoue;
+        showStatus();
     } else {
         const position = plateau[destination.r][destination.c]; 
         if (position.piece) {
             selection = position;
             drawSelection(destination.r,  destination.c);
-            showMessage("Sélectionne la destination");
         }
+        showStatus();
     }
 }
 
