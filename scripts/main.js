@@ -43,7 +43,7 @@ function onImgLoad() {
     if (nbImgChargees == imageCount) {
         initialise();
         drawBoard(size, plateau);
-        showMessage("Sélectionne une pièce");
+        showStatus();
     }
 }
 
@@ -86,31 +86,27 @@ function getMousePos(canvas, evt) {
     };
 }
 
-function getPointedSquare(canvas, evt) {
-    const mousePos = getMousePos(canvas, evt);
-    return {c: Math.floor(mousePos.x /size), r:Math.floor(mousePos.y / size)};
-}
-
 function onClick(evt) {
-    const destination = getPointedSquare(canvas, evt);
+    const mousePos = getMousePos(canvas, evt);
+    const c = Math.floor(mousePos.x /size);
+    const r = Math.floor(mousePos.y / size);
+    const caseChoisie = plateau[r][c];
     if (selection) {
-        plateau[destination.r][destination.c].piece = selection.piece;
-        drawCase(plateau[destination.r][destination.c]);
-        if ((destination.c != selection.c) || (destination.r != selection.r)) {
+        caseChoisie.piece = selection.piece;
+        drawCase(caseChoisie);
+        if (caseChoisie != selection) {
             selection.piece = null;
             drawCase(selection);
+            leBlancJoue = !leBlancJoue;
         }
         selection = null;
-        leBlancJoue = !leBlancJoue;
-        showStatus();
     } else {
-        const position = plateau[destination.r][destination.c]; 
-        if (position.piece) {
-            selection = position;
-            drawSelection(destination.r,  destination.c);
+        if (caseChoisie.piece) {
+            selection = caseChoisie;
+            drawSelection(r, c);
         }
-        showStatus();
     }
+    showStatus();
 }
 
 function drawPiece(p, r, c) {
