@@ -109,6 +109,17 @@ function onClick(evt) {
     showStatus();
 }
 
+function onAnnule() {
+    const mouvement = historique.pop();
+    plateau[mouvement.source.r][mouvement.source.c].piece = mouvement.source.piece;
+    drawCase(plateau[mouvement.source.r][mouvement.source.c]);
+    plateau[mouvement.destination.r][mouvement.destination.c].piece = mouvement.destination.piece;
+    drawCase(plateau[mouvement.destination.r][mouvement.destination.c]);
+    leBlancJoue = !leBlancJoue;
+    showStatus();
+    if (historique.length === 0) document.getElementById("btnAnnule").disabled = true;
+}
+
 function drawPiece(p, r, c) {
     if (p.noir) id = 2 * p.type;
     else id = 2 * p.type + 1;
@@ -164,7 +175,9 @@ function initialise() {
     context = canvas.getContext('2d');
     plateau = initPlateau();
     canvas.addEventListener('click', onClick, false);
-    document.getElementById("btnAnnule").disabled = true;
+    const btn = document.getElementById("btnAnnule");
+    btn.disabled = true;
+    btn.addEventListener('click', onAnnule);
 }
 
 chargeImages();
