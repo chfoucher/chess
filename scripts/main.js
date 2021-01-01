@@ -143,26 +143,13 @@ function initPlateau() {
         }
         currentNoir = !currentNoir;
     }
+    const agencement = [TOUR, CHEVAL, FOU, REINE, ROI, FOU, CHEVAL, TOUR];
     for (var c = 0; c < 8; c++) {
+        plateau[0][c].piece = new Piece(agencement[c], true);
         plateau[1][c].piece = new Piece(PION, true);
         plateau[6][c].piece = new Piece(PION, false);
+        plateau[7][c].piece = new Piece(agencement[c], false);
     }
-    plateau[0][0].piece = new Piece(TOUR, true);
-    plateau[0][1].piece = new Piece(CHEVAL, true);
-    plateau[0][2].piece = new Piece(FOU, true);
-    plateau[0][3].piece = new Piece(REINE, true);
-    plateau[0][4].piece = new Piece(ROI, true);
-    plateau[0][5].piece = new Piece(FOU, true);
-    plateau[0][6].piece = new Piece(CHEVAL, true);
-    plateau[0][7].piece = new Piece(TOUR, true);
-    plateau[7][0].piece = new Piece(TOUR, false);
-    plateau[7][1].piece = new Piece(CHEVAL, false);
-    plateau[7][2].piece = new Piece(FOU, false);
-    plateau[7][3].piece = new Piece(REINE, false);
-    plateau[7][4].piece = new Piece(ROI, false);
-    plateau[7][5].piece = new Piece(FOU, false);
-    plateau[7][6].piece = new Piece(CHEVAL, false);
-    plateau[7][7].piece = new Piece(TOUR, false);
     return plateau;
 }
 
