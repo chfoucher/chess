@@ -23,20 +23,14 @@ function chargeImage(fileName) {
 }
 
 function chargeImages() {
-    chargeImage("viseur_noir.svg");
-    chargeImage("viseur_blanc.svg");
-    chargeImage("Chess_pdt45.svg");
-    chargeImage("Chess_plt45.svg");
-    chargeImage("Chess_rdt45.svg");
-    chargeImage("Chess_rlt45.svg");
-    chargeImage("Chess_kdt45.svg");
-    chargeImage("Chess_klt45.svg");
-    chargeImage("Chess_bdt45.svg");
-    chargeImage("Chess_blt45.svg");
-    chargeImage("Chess_ndt45.svg");
-    chargeImage("Chess_nlt45.svg");
-    chargeImage("Chess_qdt45.svg");
-    chargeImage("Chess_qlt45.svg");
+    const nomFichiers = [
+        "viseur_noir.svg", "viseur_blanc.svg", "Chess_pdt45.svg",
+        "Chess_plt45.svg", "Chess_rdt45.svg", "Chess_rlt45.svg",
+        "Chess_kdt45.svg", "Chess_klt45.svg", "Chess_bdt45.svg",
+        "Chess_blt45.svg", "Chess_ndt45.svg", "Chess_nlt45.svg",
+        "Chess_qdt45.svg", "Chess_qlt45.svg"
+    ];
+    for (nom of nomFichiers) chargeImage(nom);
 }
 
 function onImgLoad() {
