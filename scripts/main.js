@@ -14,6 +14,7 @@ const CHEVAL = 5;
 const REINE = 6;
 let imageCount = 0;
 let leBlancJoue = true;
+const historique = [];
 
 function chargeImage(fileName) {
     img[imageCount] = new Image();
@@ -92,13 +93,17 @@ function onClick(evt) {
     const r = Math.floor(mousePos.y / size);
     const caseChoisie = plateau[r][c];
     if (selection) {
-        caseChoisie.piece = selection.piece;
-        drawCase(caseChoisie);
         if (caseChoisie != selection) {
+            historique.push({
+                source: {r: selection.r, c:selection.c, piece: selection.piece},
+                destination: {r: caseChoisie.r, c: caseChoisie.c, piece: caseChoisie.piece}
+            });
+            caseChoisie.piece = selection.piece;
+            drawCase(caseChoisie);
             selection.piece = null;
-            drawCase(selection);
             leBlancJoue = !leBlancJoue;
         }
+        drawCase(selection);
         selection = null;
     } else {
         if (caseChoisie.piece && (leBlancJoue === !caseChoisie.piece.noir)) {
