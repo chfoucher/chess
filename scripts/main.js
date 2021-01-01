@@ -98,6 +98,7 @@ function onClick(evt) {
                 source: {r: selection.r, c:selection.c, piece: selection.piece},
                 destination: {r: caseChoisie.r, c: caseChoisie.c, piece: caseChoisie.piece}
             });
+            document.getElementById("btnAnnule").disabled = false; 
             caseChoisie.piece = selection.piece;
             drawCase(caseChoisie);
             selection.piece = null;
@@ -169,6 +170,7 @@ function initialise() {
     context = canvas.getContext('2d');
     plateau = initPlateau();
     canvas.addEventListener('click', onClick, false);
+    document.getElementById("btnAnnule").disabled = true;
 }
 
 chargeImages();
