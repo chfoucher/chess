@@ -2,4 +2,8 @@
 Jeu d'échecs
 
 À faire :
-* Limiter les cases autorisées à la sélection à la couleur du tour
+* Ecrire API history/clear
+* Ecrire API history/save
+* Appeler history/clear dans onNouveau()
+* Ajouter bouton sauve, qui appelle history/save
+* Ecrire chargePartie sur modèle de initPartie et appelle history/get 
