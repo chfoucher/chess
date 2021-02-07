@@ -14,7 +14,8 @@ const CHEVAL = 5;
 const REINE = 6;
 let imageCount = 0;
 let leBlancJoue = true;
-historique = [];
+let historique = [];
+const casesJoueur = [];
 
 function chargeImage(fileName) {
     img[imageCount] = new Image();
@@ -100,6 +101,14 @@ function promotion(caseDestination) {
     }
 }
 
+function retirePiece(r, c) {
+    //const couleur
+}
+
+function ajoutePiece(r, c, piece) {
+
+}
+
 function onClick(evt) {
     const mousePos = getMousePos(canvas, evt);
     const c = Math.floor(mousePos.x /size);
@@ -168,6 +177,8 @@ function Piece(type, noir) {
 }
 
 function initPlateau() {
+    casesJoueur["noir"] = [];
+    casesJoueur["blanc"] = [];
     var plateau = new Array();
     var currentNoir = true;
     for (var r = 0; r < 8; r++) {
@@ -181,9 +192,13 @@ function initPlateau() {
     const agencement = [TOUR, CHEVAL, FOU, REINE, ROI, FOU, CHEVAL, TOUR];
     for (var c = 0; c < 8; c++) {
         plateau[0][c].piece = new Piece(agencement[c], true);
+        casesJoueur["noir"].push([0, c]);
         plateau[1][c].piece = new Piece(PION, true);
+        casesJoueur["noir"].push([1, c]);
         plateau[6][c].piece = new Piece(PION, false);
+        casesJoueur["blanc"].push([0, c]);
         plateau[7][c].piece = new Piece(agencement[c], false);
+        casesJoueur["blanc"].push([1, c]);
     }
     return plateau;
 }
