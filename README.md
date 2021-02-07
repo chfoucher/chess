@@ -7,7 +7,6 @@ Jeu d'échecs
 * Appeler history/clear dans onNouveau()
 * Bouton Sauve appelle history/save
 * Ecrire chargePartie sur modèle de initPartie et appelle history/get 
-* Pion en haut -> reine
 * Coder les roques
 * Lister les mouvements possibles
 * N'autoriser un mouvement que s'il fait partie de la liste

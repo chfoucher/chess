@@ -89,6 +89,16 @@ function getMousePos(canvas, evt) {
     };
 }
 
+function promotion(caseDestination) {
+    const piece = caseDestination.piece;
+    if (piece.type === PION) {
+        if ((piece.noir && caseDestination.r === 7) ||
+         (!piece.noir && caseDestination.r === 0)) {
+             piece.type = REINE;
+         }
+    }
+}
+
 function onClick(evt) {
     const mousePos = getMousePos(canvas, evt);
     const c = Math.floor(mousePos.x /size);
@@ -102,6 +112,7 @@ function onClick(evt) {
             });
             document.getElementById("btnAnnule").disabled = false; 
             caseChoisie.piece = selection.piece;
+            promotion(caseChoisie);
             drawCase(caseChoisie);
             selection.piece = null;
             leBlancJoue = !leBlancJoue;
