@@ -112,15 +112,32 @@ function retireCase(couleur, r, c) {
     }
 }
 
+function origineAutorisee(r, c) {
+    const cases = casesJoueur[joueurActif];
+    for (let i = 0; i < cases.length; i++) {
+        if (cases[i][0] === r && cases[i][1] === c) {
+            return true;
+            break;
+        }
+    }
+    return false;
+}
+
+function destinationAutorisee(r, c) {
+    const caseChoisie = plateau[r][c];
+    if (caseChoisie.piece && (caseChoisie.piece.couleur === joueurActif)) return false;
+    else return true;
+}
+
 function onClick(evt) {
     const mousePos = getMousePos(canvas, evt);
     const c = Math.floor(mousePos.x /size);
     const r = Math.floor(mousePos.y / size);
     const caseChoisie = plateau[r][c];
     if (selection) {
-        if (caseChoisie != selection) {
+        if (destinationAutorisee(r, c)) {
             historique.push({
-                source: {r: selection.r, c:selection.c, piece: selection.piece},
+                origine: {r: selection.r, c:selection.c, piece: selection.piece},
                 destination: {r: caseChoisie.r, c: caseChoisie.c, piece: caseChoisie.piece}
             });
             document.getElementById("btnAnnule").disabled = false;
@@ -137,7 +154,7 @@ function onClick(evt) {
         drawCase(selection);
         selection = null;
     } else {
-        if (caseChoisie.piece && (joueurActif === caseChoisie.piece.couleur)) {
+        if (origineAutorisee(r, c)) {
             selection = caseChoisie;
             drawSelection(r, c);
         }
@@ -147,13 +164,13 @@ function onClick(evt) {
 
 function onAnnule() {
     const mouvement = historique.pop();
-    const src = mouvement.source;
+    const orig = mouvement.origine;
     const dst = mouvement.destination;
-    retireCase(src.piece.couleur, dst.r, dst.c);
+    retireCase(orig.piece.couleur, dst.r, dst.c);
     if (dst.piece) casesJoueur[dst.piece.couleur].push(dst.r, dst.c);
-    casesJoueur[src.piece.couleur].push([src.r, src.c]); 
-    plateau[src.r][src.c].piece = src.piece;
-    drawCase(plateau[src.r][src.c]);
+    casesJoueur[orig.piece.couleur].push([orig.r, orig.c]); 
+    plateau[orig.r][orig.c].piece = orig.piece;
+    drawCase(plateau[orig.r][orig.c]);
     plateau[dst.r][dst.c].piece = dst.piece;
     drawCase(plateau[dst.r][dst.c]);
     joueurActif = (joueurActif === BLANC)?NOIR:BLANC;
