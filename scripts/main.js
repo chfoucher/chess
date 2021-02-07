@@ -12,8 +12,10 @@ const ROI = 3;
 const FOU = 4;
 const CHEVAL = 5;
 const REINE = 6;
+const NOIR = "noir";
+const BLANC = "blanc";
 let imageCount = 0;
-let leBlancJoue = true;
+let joueurActif = BLANC;
 let historique = [];
 const casesJoueur = [];
 
@@ -38,7 +40,7 @@ function initPartie() {
     historique = [];
     plateau = initPlateau();
     drawBoard(size, plateau);
-    leBlancJoue = true;
+    joueurActif = BLANC;
     showStatus();
     document.getElementById("btnAnnule").disabled = true;
 }
@@ -77,8 +79,7 @@ function showStatus() {
     if (selection) {
         showMessage("Sélectionne la destination");
     } else {
-        const joueur = leBlancJoue?"blancs":"noirs";
-        showMessage(`Aux ${joueur} de jouer`);
+        showMessage(`Aux ${joueurActif}s de jouer`);
     }
 }
 
@@ -93,20 +94,23 @@ function getMousePos(canvas, evt) {
 function promotion(caseDestination) {
     const piece = caseDestination.piece;
     if (piece.type === PION) {
-        if ((piece.noir && caseDestination.r === 7) ||
-         (!piece.noir && caseDestination.r === 0)) {
-             const nouvPiece = {type: REINE, noir: piece.noir};
+        if ((piece.couleur === NOIR && caseDestination.r === 7) ||
+         (!piece.couleur === BLANC && caseDestination.r === 0)) {
+             const nouvPiece = {type: REINE, couleur: piece.couleur};
              caseDestination.piece = nouvPiece;
          }
     }
 }
 
 function retirePiece(r, c) {
-    //const couleur
-}
-
-function ajoutePiece(r, c, piece) {
-
+    const piece = plateau[r][c].piece;
+    const cases = casesJoueur[piece.couleur];
+    for (let i = 0; i < casesJoueur[piece.couleur].length; i++) {
+        if (cases[i][0] === r && cases[i][1] === c) {
+            cases.splice(i, 1);
+            break;
+        }
+    }
 }
 
 function onClick(evt) {
@@ -120,17 +124,20 @@ function onClick(evt) {
                 source: {r: selection.r, c:selection.c, piece: selection.piece},
                 destination: {r: caseChoisie.r, c: caseChoisie.c, piece: caseChoisie.piece}
             });
-            document.getElementById("btnAnnule").disabled = false; 
+            document.getElementById("btnAnnule").disabled = false;
+            retirePiece(selection.r, selection.c);
+            if (caseChoisie.piece) retirePiece(caseChoisie.r, caseChoisie.c);
+            casesJoueur[selection.piece.couleur].push([caseChoisie.r, caseChoisie.c]); 
             caseChoisie.piece = selection.piece;
             promotion(caseChoisie);
             drawCase(caseChoisie);
             selection.piece = null;
-            leBlancJoue = !leBlancJoue;
+            joueurActif = (joueurActif === BLANC)?NOIR:BLANC;
         }
         drawCase(selection);
         selection = null;
     } else {
-        if (caseChoisie.piece && (leBlancJoue === !caseChoisie.piece.noir)) {
+        if (caseChoisie.piece && (joueurActif === caseChoisie.piece.couleur)) {
             selection = caseChoisie;
             drawSelection(r, c);
         }
@@ -144,7 +151,7 @@ function onAnnule() {
     drawCase(plateau[mouvement.source.r][mouvement.source.c]);
     plateau[mouvement.destination.r][mouvement.destination.c].piece = mouvement.destination.piece;
     drawCase(plateau[mouvement.destination.r][mouvement.destination.c]);
-    leBlancJoue = !leBlancJoue;
+    joueurActif = (joueurActif === BLANC)?NOIR:BLANC;
     showStatus();
     if (historique.length === 0) document.getElementById("btnAnnule").disabled = true;
 }
@@ -154,7 +161,7 @@ function onNouveau() {
 }
 
 function drawPiece(p, r, c) {
-    if (p.noir) id = 2 * p.type;
+    if (p.couleur === NOIR) id = 2 * p.type;
     else id = 2 * p.type + 1;
     context.drawImage(img[id], c * size, r * size, size * 0.95, size * 0.95);
 }
@@ -171,9 +178,9 @@ function Case(r, c, noir) {
     this.noir = noir;
 }
 
-function Piece(type, noir) {
+function Piece(type, couleur) {
     this.type = type;
-    this.noir = noir;
+    this.couleur = couleur;
 }
 
 function initPlateau() {
@@ -191,14 +198,14 @@ function initPlateau() {
     }
     const agencement = [TOUR, CHEVAL, FOU, REINE, ROI, FOU, CHEVAL, TOUR];
     for (var c = 0; c < 8; c++) {
-        plateau[0][c].piece = new Piece(agencement[c], true);
-        casesJoueur["noir"].push([0, c]);
-        plateau[1][c].piece = new Piece(PION, true);
-        casesJoueur["noir"].push([1, c]);
-        plateau[6][c].piece = new Piece(PION, false);
-        casesJoueur["blanc"].push([0, c]);
-        plateau[7][c].piece = new Piece(agencement[c], false);
-        casesJoueur["blanc"].push([1, c]);
+        plateau[0][c].piece = new Piece(agencement[c], NOIR);
+        casesJoueur[NOIR].push([0, c]);
+        plateau[1][c].piece = new Piece(PION, NOIR);
+        casesJoueur[NOIR].push([1, c]);
+        plateau[6][c].piece = new Piece(PION, BLANC);
+        casesJoueur[BLANC].push([6, c]);
+        plateau[7][c].piece = new Piece(agencement[c], BLANC);
+        casesJoueur[BLANC].push([7, c]);
     }
     return plateau;
 }
