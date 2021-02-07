@@ -102,10 +102,9 @@ function promotion(caseDestination) {
     }
 }
 
-function retirePiece(r, c) {
-    const piece = plateau[r][c].piece;
-    const cases = casesJoueur[piece.couleur];
-    for (let i = 0; i < casesJoueur[piece.couleur].length; i++) {
+function retireCase(couleur, r, c) {
+    const cases = casesJoueur[couleur];
+    for (let i = 0; i < cases.length; i++) {
         if (cases[i][0] === r && cases[i][1] === c) {
             cases.splice(i, 1);
             break;
@@ -125,14 +124,15 @@ function onClick(evt) {
                 destination: {r: caseChoisie.r, c: caseChoisie.c, piece: caseChoisie.piece}
             });
             document.getElementById("btnAnnule").disabled = false;
-            retirePiece(selection.r, selection.c);
-            if (caseChoisie.piece) retirePiece(caseChoisie.r, caseChoisie.c);
-            casesJoueur[selection.piece.couleur].push([caseChoisie.r, caseChoisie.c]); 
+            const adversaire = (joueurActif === BLANC)?NOIR:BLANC;
+            retireCase(joueurActif, selection.r, selection.c);
+            if (caseChoisie.piece) retireCase(adversaire, caseChoisie.r, caseChoisie.c);
+            casesJoueur[joueurActif].push([caseChoisie.r, caseChoisie.c]); 
             caseChoisie.piece = selection.piece;
             promotion(caseChoisie);
             drawCase(caseChoisie);
             selection.piece = null;
-            joueurActif = (joueurActif === BLANC)?NOIR:BLANC;
+            joueurActif = adversaire;
         }
         drawCase(selection);
         selection = null;
@@ -147,10 +147,15 @@ function onClick(evt) {
 
 function onAnnule() {
     const mouvement = historique.pop();
-    plateau[mouvement.source.r][mouvement.source.c].piece = mouvement.source.piece;
-    drawCase(plateau[mouvement.source.r][mouvement.source.c]);
-    plateau[mouvement.destination.r][mouvement.destination.c].piece = mouvement.destination.piece;
-    drawCase(plateau[mouvement.destination.r][mouvement.destination.c]);
+    const src = mouvement.source;
+    const dst = mouvement.destination;
+    retireCase(src.piece.couleur, dst.r, dst.c);
+    if (dst.piece) casesJoueur[dst.piece.couleur].push(dst.r, dst.c);
+    casesJoueur[src.piece.couleur].push([src.r, src.c]); 
+    plateau[src.r][src.c].piece = src.piece;
+    drawCase(plateau[src.r][src.c]);
+    plateau[dst.r][dst.c].piece = dst.piece;
+    drawCase(plateau[dst.r][dst.c]);
     joueurActif = (joueurActif === BLANC)?NOIR:BLANC;
     showStatus();
     if (historique.length === 0) document.getElementById("btnAnnule").disabled = true;
