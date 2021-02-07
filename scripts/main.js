@@ -174,6 +174,36 @@ function initPlateau() {
     return plateau;
 }
 
+function enregistreHistorique() {
+    const xhr = new XMLHttpRequest();
+
+    // listen for `load` event
+    xhr.onload = () => {
+        // print JSON response
+        if (xhr.status >= 200 && xhr.status < 300) {
+            // parse JSON
+            const response = JSON.parse(xhr.responseText);
+            console.log(response);
+        }
+    };
+    
+    // create a JSON object
+    const json = {
+        "email": "eve.holt@reqres.in",
+        "password": "cityslicka"
+    };
+    
+    // open request
+    xhr.open('POST', 'http://pele.foucher.free.fr/Christophe/chess/history/set.php');
+    
+    // set `Content-Type` header
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    
+    // send rquest with JSON payload
+    xhr.send(JSON.stringify(json));
+
+}
+
 function initialise() {
     canvas = document.getElementById('myCanvas');
     let length = window.innerHeight;
@@ -188,6 +218,44 @@ function initialise() {
     btn.addEventListener('click', onAnnule);
     document.getElementById("btnNouveau").addEventListener('click', onNouveau);
 }
+
+// Function that formats the string with HTML tags, then outputs the result
+function showHistory(data) {
+    var output = "<ul>"; // Open list
+    var i;
+    
+    // Loop through the moves, and add them as list items
+    for (var i in data.artists) {
+        output += "<li>" + data.artists[i].artistname + " (Born: " + data.artists[i].born + ")</li>"; 
+    }
+    
+    output += "</ul>"; // Close list
+
+    // Output the data to the "artistlist" element
+    document.getElementById("artistList").innerHTML = output;
+}
+
+// Store XMLHttpRequest and the JSON file location in variables
+var xhr = new XMLHttpRequest();
+var url = "http://pele.foucher.free.fr/Christophe/chess/history/get.php";
+
+// Called whenever the readyState attribute changes 
+xhr.onreadystatechange = function() {
+
+  // Check if fetch request is done
+  if (xhr.readyState == 4 && xhr.status == 200) { 
+  
+    // Parse the JSON string
+    var jsonData = JSON.parse(xhr.responseText);
+    
+    // Call the showArtists(), passing in the parsed JSON string
+    showHistory(jsonData);
+  }
+};
+
+// Do the HTTP call using the url variable we specified above
+//xhr.open("GET", url, true);
+//xhr.send();
 
 chargeImages();
 initialise();
