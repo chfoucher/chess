@@ -94,7 +94,8 @@ function promotion(caseDestination) {
     if (piece.type === PION) {
         if ((piece.noir && caseDestination.r === 7) ||
          (!piece.noir && caseDestination.r === 0)) {
-             piece.type = REINE;
+             const nouvPiece = {type: REINE, noir: piece.noir};
+             caseDestination.piece = nouvPiece;
          }
     }
 }
