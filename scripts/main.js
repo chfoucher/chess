@@ -14,7 +14,7 @@ const CHEVAL = 5;
 const REINE = 6;
 let imageCount = 0;
 let leBlancJoue = true;
-const historique = [];
+historique = [];
 
 function chargeImage(fileName) {
     img[imageCount] = new Image();
@@ -34,10 +34,12 @@ function chargeImages() {
 }
 
 function initPartie() {
+    historique = [];
     plateau = initPlateau();
     drawBoard(size, plateau);
     leBlancJoue = true;
     showStatus();
+    document.getElementById("btnAnnule").disabled = true;
 }
 
 function onImgLoad() {
