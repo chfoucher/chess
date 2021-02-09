@@ -18,6 +18,8 @@ let imageCount = 0;
 let joueurActif = BLANC;
 let historique = [];
 const casesJoueur = [];
+let mouvementsAutorises;
+let indexOrigine;
 
 function chargeImage(fileName) {
     img[imageCount] = new Image();
@@ -41,6 +43,7 @@ function initPartie() {
     plateau = initPlateau();
     drawBoard(size, plateau);
     joueurActif = BLANC;
+    calculeMouvements();
     showStatus();
     document.getElementById("btnAnnule").disabled = true;
 }
@@ -112,10 +115,58 @@ function retireCase(couleur, r, c) {
     }
 }
 
+function calculeMouvementsPion(r, c) {
+    const resultat = [];
+    var dr, dc;
+    const direction = (joueurActif) === BLANC?-1:1;
+    // Avance de 1
+    dr = r + direction;
+    dc = c;
+    if (dr <= 7 && dr >= 0 && !(plateau[dr][dc].piece)) resultat.push([dr, dc]);
+    // Avance de 2
+    const startingRow = (joueurActif) === BLANC?6:1;
+    if (r === startingRow) {
+        dr = r + direction * 2;
+        if (dr <= 7 && dr >= 0 && !(plateau[dr][dc].piece)) resultat.push([dr, dc]);
+    }
+    // Mange à gauche
+    dr = r + direction;
+    dc = c - 1;
+    if (dr <= 7 && dr >= 0 && dc >= 0 && (plateau[dr][dc].piece) &&
+        plateau[dr][dc].piece.couleur != joueurActif)
+        resultat.push([dr, dc]);
+    // Mange à droite
+    dc = c + 1;
+    if (dr <= 7 && dr >= 0 && dc <= 7 && (plateau[dr][dc].piece) &&
+        plateau[dr][dc].piece.couleur != joueurActif)
+        resultat.push([dr, dc]);
+    return resultat;
+}
+
+function calculeMouvementsPiece(r, c) {
+    const piece = plateau[r][c].piece;
+    var resultat = [];
+    switch(piece.type) {
+        case PION:
+            resultat = calculeMouvementsPion(r, c);
+            break;
+    }
+    return resultat;
+}
+
+function calculeMouvements() {
+    mouvementsAutorises = [];
+    for (origine of casesJoueur[joueurActif]) {
+        mouvementsAutorises.push(calculeMouvementsPiece(...origine))
+    }
+    console.log(mouvementsAutorises);
+}
+
 function origineAutorisee(r, c) {
     const cases = casesJoueur[joueurActif];
     for (let i = 0; i < cases.length; i++) {
-        if (cases[i][0] === r && cases[i][1] === c) {
+        if (cases[i][0] === r && cases[i][1] === c && mouvementsAutorises[i].length) {
+            indexOrigine = i;
             return true;
             break;
         }
@@ -123,10 +174,15 @@ function origineAutorisee(r, c) {
     return false;
 }
 
-function destinationAutorisee(r, c) {
-    const caseChoisie = plateau[r][c];
-    if (caseChoisie.piece && (caseChoisie.piece.couleur === joueurActif)) return false;
-    else return true;
+function destinationAutorisee(dr, dc) {
+    const cases = mouvementsAutorises[indexOrigine];
+    for (let i = 0; i < cases.length; i++) {
+        if (cases[i][0] === dr && cases[i][1] === dc) {
+            return true;
+            break;
+        }
+    }
+    return false;
 }
 
 function onClick(evt) {
@@ -150,6 +206,7 @@ function onClick(evt) {
             drawCase(caseChoisie);
             selection.piece = null;
             joueurActif = adversaire;
+            calculeMouvements();
         }
         drawCase(selection);
         selection = null;
@@ -174,6 +231,7 @@ function onAnnule() {
     plateau[dst.r][dst.c].piece = dst.piece;
     drawCase(plateau[dst.r][dst.c]);
     joueurActif = (joueurActif === BLANC)?NOIR:BLANC;
+    calculeMouvements();
     showStatus();
     if (historique.length === 0) document.getElementById("btnAnnule").disabled = true;
 }
