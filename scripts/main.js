@@ -17,8 +17,7 @@ const BLANC = "blanc";
 let imageCount = 0;
 let joueurActif = BLANC;
 let historique = [];
-const casesJoueur = [];
-let mouvementsAutorises;
+const mvtsPossibles = [];
 let indexOrigine;
 
 function chargeImage(fileName) {
@@ -98,18 +97,22 @@ function promotion(caseDestination) {
     const piece = caseDestination.piece;
     if (piece.type === PION) {
         if ((piece.couleur === NOIR && caseDestination.r === 7) ||
-         (!piece.couleur === BLANC && caseDestination.r === 0)) {
+         (piece.couleur === BLANC && caseDestination.r === 0)) {
              const nouvPiece = {type: REINE, couleur: piece.couleur};
              caseDestination.piece = nouvPiece;
          }
     }
 }
 
-function retireCase(couleur, r, c) {
-    const cases = casesJoueur[couleur];
-    for (let i = 0; i < cases.length; i++) {
-        if (cases[i][0] === r && cases[i][1] === c) {
-            cases.splice(i, 1);
+function ajouteOrigine(couleur, r, c) {
+    mvtsPossibles[couleur].push({origine: [r, c], destinations:[]});
+}
+
+function retireOrigine(couleur, r, c) {
+    const mvts = mvtsPossibles[couleur];
+    for (let i = 0; i < mvts.length; i++) {
+        if (mvts[i].origine[0] === r && mvts[i].origine[1] === c) {
+            mvts.splice(i, 1);
             break;
         }
     }
@@ -143,7 +146,7 @@ function calculeMouvementsPion(r, c) {
     return resultat;
 }
 
-function calculeMouvementsPiece(r, c) {
+function calculeMouvementsOrigine(r, c) {
     const piece = plateau[r][c].piece;
     var resultat = [];
     switch(piece.type) {
@@ -155,17 +158,15 @@ function calculeMouvementsPiece(r, c) {
 }
 
 function calculeMouvements() {
-    mouvementsAutorises = [];
-    for (origine of casesJoueur[joueurActif]) {
-        mouvementsAutorises.push(calculeMouvementsPiece(...origine))
+    for (possibilite of mvtsPossibles[joueurActif]) {
+        possibilite.destinations = calculeMouvementsOrigine(...(possibilite.origine));
     }
-    console.log(mouvementsAutorises);
 }
 
 function origineAutorisee(r, c) {
-    const cases = casesJoueur[joueurActif];
+    const cases = mvtsPossibles[joueurActif];
     for (let i = 0; i < cases.length; i++) {
-        if (cases[i][0] === r && cases[i][1] === c && mouvementsAutorises[i].length) {
+        if (cases[i].origine[0] === r && cases[i].origine[1] === c && cases[i].destinations.length) {
             indexOrigine = i;
             return true;
             break;
@@ -175,9 +176,9 @@ function origineAutorisee(r, c) {
 }
 
 function destinationAutorisee(dr, dc) {
-    const cases = mouvementsAutorises[indexOrigine];
-    for (let i = 0; i < cases.length; i++) {
-        if (cases[i][0] === dr && cases[i][1] === dc) {
+    const destinations = mvtsPossibles[joueurActif][indexOrigine].destinations;
+    for (let i = 0; i < destinations.length; i++) {
+        if (destinations[i][0] === dr && destinations[i][1] === dc) {
             return true;
             break;
         }
@@ -198,9 +199,9 @@ function onClick(evt) {
             });
             document.getElementById("btnAnnule").disabled = false;
             const adversaire = (joueurActif === BLANC)?NOIR:BLANC;
-            retireCase(joueurActif, selection.r, selection.c);
-            if (caseChoisie.piece) retireCase(adversaire, caseChoisie.r, caseChoisie.c);
-            casesJoueur[joueurActif].push([caseChoisie.r, caseChoisie.c]); 
+            retireOrigine(joueurActif, selection.r, selection.c);
+            if (caseChoisie.piece) retireOrigine(adversaire, caseChoisie.r, caseChoisie.c);
+            ajouteOrigine(joueurActif, caseChoisie.r, caseChoisie.c);
             caseChoisie.piece = selection.piece;
             promotion(caseChoisie);
             drawCase(caseChoisie);
@@ -223,9 +224,9 @@ function onAnnule() {
     const mouvement = historique.pop();
     const orig = mouvement.origine;
     const dst = mouvement.destination;
-    retireCase(orig.piece.couleur, dst.r, dst.c);
-    if (dst.piece) casesJoueur[dst.piece.couleur].push(dst.r, dst.c);
-    casesJoueur[orig.piece.couleur].push([orig.r, orig.c]); 
+    retireOrigine(orig.piece.couleur, dst.r, dst.c);
+    if (dst.piece) ajouteOrigine(dst.piece.couleur, dst.r, dst.c);
+    ajouteOrigine(orig.piece.couleur, orig.r, orig.c);
     plateau[orig.r][orig.c].piece = orig.piece;
     drawCase(plateau[orig.r][orig.c]);
     plateau[dst.r][dst.c].piece = dst.piece;
@@ -264,8 +265,8 @@ function Piece(type, couleur) {
 }
 
 function initPlateau() {
-    casesJoueur["noir"] = [];
-    casesJoueur["blanc"] = [];
+    mvtsPossibles[NOIR] = [];
+    mvtsPossibles[BLANC] = [];
     var plateau = new Array();
     var currentNoir = true;
     for (var r = 0; r < 8; r++) {
@@ -279,13 +280,13 @@ function initPlateau() {
     const agencement = [TOUR, CHEVAL, FOU, REINE, ROI, FOU, CHEVAL, TOUR];
     for (var c = 0; c < 8; c++) {
         plateau[0][c].piece = new Piece(agencement[c], NOIR);
-        casesJoueur[NOIR].push([0, c]);
+        ajouteOrigine(NOIR, 0, c);
         plateau[1][c].piece = new Piece(PION, NOIR);
-        casesJoueur[NOIR].push([1, c]);
+        ajouteOrigine(NOIR, 1, c);
         plateau[6][c].piece = new Piece(PION, BLANC);
-        casesJoueur[BLANC].push([6, c]);
+        ajouteOrigine(BLANC, 6, c);
         plateau[7][c].piece = new Piece(agencement[c], BLANC);
-        casesJoueur[BLANC].push([7, c]);
+        ajouteOrigine(BLANC, 7, c);
     }
     return plateau;
 }
