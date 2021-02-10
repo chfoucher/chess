@@ -146,12 +146,31 @@ function calculeMouvementsPion(r, c) {
     return resultat;
 }
 
+function calculeMouvementsCavalier(r, c) {
+    const resultat = [];
+    var dr, dc;
+    const mvtsCavalier = [[1, 2], [2, 1], [-1, 2], [2, -1], [1, -2], [-2, 1], [-1, -2], [-2, -1]];
+    for (const mvt of mvtsCavalier) {
+        dr = r + mvt[0];
+        dc = c + mvt[1];
+        if (dr <= 7 && dr >= 0 && dc <= 7 && dc >= 0) {
+            if (!(plateau[dr][dc].piece) || (plateau[dr][dc].piece.couleur != joueurActif)) {
+                resultat.push([dr, dc]);
+            }
+        }
+    }
+    return resultat;
+}
+
 function calculeMouvementsOrigine(r, c) {
     const piece = plateau[r][c].piece;
     var resultat = [];
-    switch(piece.type) {
+    switch (piece.type) {
         case PION:
             resultat = calculeMouvementsPion(r, c);
+            break;
+        case CHEVAL:
+            resultat = calculeMouvementsCavalier(r, c);
             break;
     }
     return resultat;
