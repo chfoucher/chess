@@ -146,11 +146,10 @@ function calculeMouvementsPion(r, c) {
     return resultat;
 }
 
-function calculeMouvementsCavalier(r, c) {
+function calculeMouvementsCercle(mvts, r, c) {
     const resultat = [];
     var dr, dc;
-    const mvtsCavalier = [[1, 2], [2, 1], [-1, 2], [2, -1], [1, -2], [-2, 1], [-1, -2], [-2, -1]];
-    for (const mvt of mvtsCavalier) {
+    for (const mvt of mvts) {
         dr = r + mvt[0];
         dc = c + mvt[1];
         if (dr <= 7 && dr >= 0 && dc <= 7 && dc >= 0) {
@@ -162,6 +161,57 @@ function calculeMouvementsCavalier(r, c) {
     return resultat;
 }
 
+function calculeMouvementsCavalier(r, c) {
+    return calculeMouvementsCercle(
+        [[1, 2], [2, 1], [-1, 2], [2, -1],
+         [1, -2], [-2, 1], [-1, -2], [-2, -1]],
+        r, c);
+}
+
+function calculeMouvementsRoi(r, c) {
+    return calculeMouvementsCercle(
+        [[1, 0], [1, 1], [1, -1], [0, -1],
+         [-1, 0], [-1, 1], [-1, -1], [0, 1]],
+        r, c);
+}
+
+function calculeMouvementsLigne(mvts, r, c) {
+    const resultat = [];
+    var dr, dc;
+    for (const mvt of mvts) {
+        dr = r + mvt[0];
+        dc = c + mvt[1];
+        while (dr <= 7 && dr >= 0 && dc <= 7 && dc >= 0) {
+            if (plateau[dr][dc].piece) {
+                if (plateau[dr][dc].piece.couleur != joueurActif) {
+                    // Prise
+                    resultat.push([dr, dc]);
+                }
+                break; // Fin de la trajectoire
+            } else { // Simple mouvement
+                resultat.push([dr, dc]);
+            }
+            dr += mvt[0];
+            dc += mvt[1];
+        }
+    }
+    return resultat;
+}
+
+function calculeMouvementsFou(r, c) {
+    return calculeMouvementsLigne([[1, 1], [1, -1], [-1, -1], [-1, 1]], r, c);
+}
+
+function calculeMouvementsTour(r, c) {
+    return calculeMouvementsLigne([[0, 1], [0, -1], [-1, 0], [1, 0]], r, c);
+}
+
+function calculeMouvementsReine(r, c) {
+    const mvtsFou = calculeMouvementsFou(r, c);
+    const mvtsTour = calculeMouvementsTour(r, c);
+    return mvtsFou.concat(mvtsTour);
+}
+
 function calculeMouvementsOrigine(r, c) {
     const piece = plateau[r][c].piece;
     var resultat = [];
@@ -171,6 +221,18 @@ function calculeMouvementsOrigine(r, c) {
             break;
         case CHEVAL:
             resultat = calculeMouvementsCavalier(r, c);
+            break;
+        case FOU:
+            resultat = calculeMouvementsFou(r, c);
+            break;
+        case TOUR:
+            resultat = calculeMouvementsTour(r, c);
+            break;
+        case REINE:
+            resultat = calculeMouvementsReine(r, c);
+            break;
+        case ROI:
+            resultat = calculeMouvementsRoi(r, c);
             break;
     }
     return resultat;
