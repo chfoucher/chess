@@ -104,6 +104,18 @@ function promotion(caseDestination) {
     }
 }
 
+function roque(or, oc, dr, dc) {
+    console.log(`roque(${or}, ${oc}, ${dr}, ${dc})`);
+    if (plateau[or][oc].piece.type === ROI) {
+        if (dc == 2) {
+            console.log("Grand roque!");
+        }
+        if (dc == 6) {
+            console.log("Petit roque!");
+        }
+    }
+}
+
 function ajouteOrigine(couleur, r, c) {
     mvtsPossibles[couleur].push({origine: [r, c], destinations:[]});
 }
@@ -168,11 +180,22 @@ function calculeMouvementsCavalier(r, c) {
         r, c);
 }
 
+function calculeRoque(r, c) {
+    const resultat = [];
+    const startingRow = (joueurActif) === BLANC?7:0;
+    if (r == startingRow && c == 4 && !plateau[r][c+1].piece && !plateau[r][c+2].piece) {
+        resultat.push([r, c + 2]);
+    }
+    return resultat;
+}
+
 function calculeMouvementsRoi(r, c) {
-    return calculeMouvementsCercle(
+    const mvtsNormaux = calculeMouvementsCercle(
         [[1, 0], [1, 1], [1, -1], [0, -1],
-         [-1, 0], [-1, 1], [-1, -1], [0, 1]],
+        [-1, 0], [-1, 1], [-1, -1], [0, 1]],
         r, c);
+    const mvtsRoque = calculeRoque(r, c);
+    return mvtsNormaux.concat(mvtsRoque);
 }
 
 function calculeMouvementsLigne(mvts, r, c) {
@@ -285,6 +308,7 @@ function onClick(evt) {
             ajouteOrigine(joueurActif, caseChoisie.r, caseChoisie.c);
             caseChoisie.piece = selection.piece;
             promotion(caseChoisie);
+            roque(selection.r, selection.c, caseChoisie.r, caseChoisie.c);
             drawCase(caseChoisie);
             selection.piece = null;
             joueurActif = adversaire;
