@@ -105,13 +105,30 @@ function promotion(caseDestination) {
 }
 
 function roque(or, oc, dr, dc) {
-    console.log(`roque(${or}, ${oc}, ${dr}, ${dc})`);
-    if (plateau[or][oc].piece.type === ROI) {
+    const couleur = plateau[or][oc].piece.couleur;
+    const row = or;
+    let origCol, destCol;
+    let roqueEnCours = false;
+    if ((oc == 4) && (plateau[or][oc].piece.type === ROI)) {
         if (dc == 2) {
-            console.log("Grand roque!");
+            origCol = 0;
+            destCol = dc + 1;
+            roqueEnCours = true;
         }
         if (dc == 6) {
-            console.log("Petit roque!");
+            origCol = 7;
+            destCol = dc - 1;
+            roqueEnCours = true;
+        }
+        if (roqueEnCours) {
+            const caseOrigTour = plateau[row][origCol];
+            const caseDestTour = plateau[row][destCol];
+            caseDestTour.piece = caseOrigTour.piece;
+            caseOrigTour.piece = null;
+            drawCase(caseDestTour);
+            drawCase(caseOrigTour);
+            retireOrigine(couleur, row, origCol);
+            ajouteOrigine(couleur, row, destCol);
         }
     }
 }
@@ -185,6 +202,9 @@ function calculeRoque(r, c) {
     const startingRow = (joueurActif) === BLANC?7:0;
     if (r == startingRow && c == 4 && !plateau[r][c+1].piece && !plateau[r][c+2].piece) {
         resultat.push([r, c + 2]);
+    }
+    if (r == startingRow && c == 4 && !plateau[r][c-1].piece && !plateau[r][c-2].piece && !plateau[r][c-3].piece) {
+        resultat.push([r, c - 2]);
     }
     return resultat;
 }
@@ -327,11 +347,31 @@ function onClick(evt) {
 
 function onAnnule() {
     const mouvement = historique.pop();
-    const orig = mouvement.origine;
+    const orig = mouvement.origine; // {row, col, piece}
     const dst = mouvement.destination;
-    retireOrigine(orig.piece.couleur, dst.r, dst.c);
+    const couleur = orig.piece.couleur;
+    const roque = (orig.piece.type === ROI) && (Math.abs(dst.c - orig.c) == 2);
+    if (roque) {
+        if (dst.c - orig.c > 0) {
+            const dt = dst.c - 1;
+            retireOrigine(couleur, dst.r, 5);
+            ajouteOrigine(couleur, dst.r, 7);
+            plateau[dst.r][7].piece = plateau[dst.r][5].piece;
+            plateau[dst.r][5].piece = null;
+            drawCase(plateau[dst.r][7]);
+            drawCase(plateau[dst.r][5]);
+        } else {
+            retireOrigine(couleur, dst.r, 3);
+            ajouteOrigine(couleur, dst.r, 0);
+            plateau[dst.r][0].piece = plateau[dst.r][3].piece;
+            plateau[dst.r][3].piece = null;
+            drawCase(plateau[dst.r][0]);
+            drawCase(plateau[dst.r][3]);
+        }
+    }
+    retireOrigine(couleur, dst.r, dst.c);
     if (dst.piece) ajouteOrigine(dst.piece.couleur, dst.r, dst.c);
-    ajouteOrigine(orig.piece.couleur, orig.r, orig.c);
+    ajouteOrigine(couleur, orig.r, orig.c);
     plateau[orig.r][orig.c].piece = orig.piece;
     drawCase(plateau[orig.r][orig.c]);
     plateau[dst.r][dst.c].piece = dst.piece;
