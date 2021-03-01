@@ -28,11 +28,11 @@ function chargeImage(fileName) {
 
 function chargeImages() {
     const nomFichiers = [
-        "viseur_noir.svg", "viseur_blanc.svg", "Chess_pdt45.svg",
-        "Chess_plt45.svg", "Chess_rdt45.svg", "Chess_rlt45.svg",
-        "Chess_kdt45.svg", "Chess_klt45.svg", "Chess_bdt45.svg",
-        "Chess_blt45.svg", "Chess_ndt45.svg", "Chess_nlt45.svg",
-        "Chess_qdt45.svg", "Chess_qlt45.svg"
+        "viseur_noir.svg", "viseur_blanc.svg", "Chess_hdt45.svg",
+        "Chess_plt45.svg", "Chess_mdt45.svg", "Chess_rlt45.svg",
+        "Chess_fdt45.svg", "Chess_klt45.svg", "Chess_Bdt45.svg",
+        "Chess_blt45.svg", "Chess_Ndt45.svg", "Chess_nlt45.svg",
+        "Chess_gdt45.svg", "Chess_qlt45.svg"
     ];
     for (nom of nomFichiers) chargeImage(nom);
 }
@@ -57,9 +57,9 @@ function onImgLoad() {
 
 function drawCase(Case) {
     if (Case.noir) {
-        context.fillStyle = 'grey';
+        context.fillStyle = '#d18b47';
     } else {
-        context.fillStyle = 'white';
+        context.fillStyle = '#ffce9e';
     }
     context.fillRect(Case.c * size, Case.r * size, size, size);
     if (Case.piece) drawPiece(Case.piece, Case.r, Case.c)
@@ -413,7 +413,7 @@ function initPlateau() {
     mvtsPossibles[NOIR] = [];
     mvtsPossibles[BLANC] = [];
     var plateau = new Array();
-    var currentNoir = true;
+    var currentNoir = false;
     for (var r = 0; r < 8; r++) {
         plateau[r] = new Array();
         for (var c = 0; c < 8; c++) {
@@ -471,9 +471,9 @@ function initialise() {
     let length = window.innerHeight;
     if (length > window.innerWidth) length = window.innerWidth;
     length = Math.floor(0.9 * length);
-    canvas.width = length;
-    canvas.height = length;
-    size = Math.floor(canvas.width / 8);
+    size = Math.floor(length / 8);
+    canvas.width = size * 8;
+    canvas.height = size * 8;
     context = canvas.getContext('2d');
     const btn = document.getElementById("btnAnnule");
     btn.disabled = true;
