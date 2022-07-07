@@ -1,2 +1,4 @@
 history/conf.php
+node_modules
+package-lock.json
 *~
