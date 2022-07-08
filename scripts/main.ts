@@ -1,10 +1,31 @@
+type MouvementPossible = {
+    origine: Position;
+    destinations: Position[];
+};
+
+type Case = {
+    r: number;
+    c: number;
+    noir?: boolean;
+    piece?: any;
+};
+
+type Mouvement = {
+    origine: Case;
+    destination: Case;
+}
+
+type Position = { r: number; c: number };
+
+type Couleur = "noir" | "blanc";
+
 var canvas;
 var size;
 var context;
 var plateau;
 var nbImgChargees = 0;
-var img = [];
-var selection = false;
+const img:HTMLImageElement[] = [];
+let selection: Case|null = null;
 const VISEUR = 0;
 const PION = 1;
 const TOUR = 2;
@@ -15,9 +36,9 @@ const REINE = 6;
 const NOIR = "noir";
 const BLANC = "blanc";
 let imageCount = 0;
-let joueurActif = BLANC;
-let historique = [];
-const mvtsPossibles = [];
+let joueurActif: Couleur = BLANC;
+let historique: Mouvement[] = [];
+const mvtsPossibles: MouvementPossible[][] = [[], []];
 let indexOrigine;
 
 function chargeImage(fileName) {
@@ -34,7 +55,7 @@ function chargeImages() {
         "Chess_blt45.svg", "Chess_Ndt45.svg", "Chess_nlt45.svg",
         "Chess_gdt45.svg", "Chess_qlt45.svg"
     ];
-    for (nom of nomFichiers) chargeImage(nom);
+    for (const nom of nomFichiers) chargeImage(nom);
 }
 
 function initPartie() {
@@ -44,7 +65,12 @@ function initPartie() {
     joueurActif = BLANC;
     calculeMouvements();
     showStatus();
-    document.getElementById("btnAnnule").disabled = true;
+    disableBtnAnnule(true);
+}
+
+function disableBtnAnnule(disable: boolean) {
+    const button = document.getElementById("btnAnnule") as HTMLButtonElement;
+    button.disabled = disable;
 }
 
 function onImgLoad() {
@@ -73,8 +99,8 @@ function drawBoard(size, plateau) {
 }
 
 function showMessage(message) {
-    var messageBlock = document.getElementById("message");
-    messageBlock.innerText = message;
+    const messageBlock = document.getElementById("message");
+    if (messageBlock) messageBlock.innerText = message;
 }
 
 function showStatus() {
@@ -134,56 +160,56 @@ function roque(or, oc, dr, dc) {
 }
 
 function ajouteOrigine(couleur, r, c) {
-    mvtsPossibles[couleur].push({origine: [r, c], destinations:[]});
+    mvtsPossibles[couleur].push({origine: { r, c }, destinations:[]});
 }
 
 function retireOrigine(couleur, r, c) {
     const mvts = mvtsPossibles[couleur];
     for (let i = 0; i < mvts.length; i++) {
-        if (mvts[i].origine[0] === r && mvts[i].origine[1] === c) {
+        if (mvts[i].origine.r === r && mvts[i].origine.c === c) {
             mvts.splice(i, 1);
             break;
         }
     }
 }
 
-function calculeMouvementsPion(r, c) {
-    const resultat = [];
-    var dr, dc;
+function calculeMouvementsPion(r: number, c: number) {
+    const resultat: Position[] = [];
+    let dr: number, dc: number;
     const direction = (joueurActif) === BLANC?-1:1;
     // Avance de 1
     dr = r + direction;
     dc = c;
-    if (dr <= 7 && dr >= 0 && !(plateau[dr][dc].piece)) resultat.push([dr, dc]);
+    if (dr <= 7 && dr >= 0 && !(plateau[dr][dc].piece)) resultat.push({ r: dr, c: dc });
     // Avance de 2
     const startingRow = (joueurActif) === BLANC?6:1;
     if (r === startingRow) {
         dr = r + direction * 2;
-        if (dr <= 7 && dr >= 0 && !(plateau[dr][dc].piece)) resultat.push([dr, dc]);
+        if (dr <= 7 && dr >= 0 && !(plateau[dr][dc].piece)) resultat.push({ r: dr, c: dc });
     }
     // Mange à gauche
     dr = r + direction;
     dc = c - 1;
     if (dr <= 7 && dr >= 0 && dc >= 0 && (plateau[dr][dc].piece) &&
         plateau[dr][dc].piece.couleur != joueurActif)
-        resultat.push([dr, dc]);
+        resultat.push({ r: dr, c: dc });
     // Mange à droite
     dc = c + 1;
     if (dr <= 7 && dr >= 0 && dc <= 7 && (plateau[dr][dc].piece) &&
         plateau[dr][dc].piece.couleur != joueurActif)
-        resultat.push([dr, dc]);
+        resultat.push({ r: dr, c: dc });
     return resultat;
 }
 
-function calculeMouvementsCercle(mvts, r, c) {
-    const resultat = [];
-    var dr, dc;
+function calculeMouvementsCercle(mvts: number[][], r: number, c: number) {
+    const resultat: Position[] = [];
+    let dr: number, dc: number;
     for (const mvt of mvts) {
         dr = r + mvt[0];
         dc = c + mvt[1];
         if (dr <= 7 && dr >= 0 && dc <= 7 && dc >= 0) {
             if (!(plateau[dr][dc].piece) || (plateau[dr][dc].piece.couleur != joueurActif)) {
-                resultat.push([dr, dc]);
+                resultat.push({ r: dr, c: dc });
             }
         }
     }
@@ -198,13 +224,13 @@ function calculeMouvementsCavalier(r, c) {
 }
 
 function calculeRoque(r, c) {
-    const resultat = [];
+    const resultat: Position[] = [];
     const startingRow = (joueurActif) === BLANC?7:0;
     if (r == startingRow && c == 4 && !plateau[r][c+1].piece && !plateau[r][c+2].piece) {
-        resultat.push([r, c + 2]);
+        resultat.push({ r, c: c + 2 });
     }
     if (r == startingRow && c == 4 && !plateau[r][c-1].piece && !plateau[r][c-2].piece && !plateau[r][c-3].piece) {
-        resultat.push([r, c - 2]);
+        resultat.push({ r, c: c - 2 });
     }
     return resultat;
 }
@@ -219,7 +245,7 @@ function calculeMouvementsRoi(r, c) {
 }
 
 function calculeMouvementsLigne(mvts, r, c) {
-    const resultat = [];
+    const resultat: Position[] = [];
     var dr, dc;
     for (const mvt of mvts) {
         dr = r + mvt[0];
@@ -228,11 +254,11 @@ function calculeMouvementsLigne(mvts, r, c) {
             if (plateau[dr][dc].piece) {
                 if (plateau[dr][dc].piece.couleur != joueurActif) {
                     // Prise
-                    resultat.push([dr, dc]);
+                    resultat.push({ r: dr, c: dc });
                 }
                 break; // Fin de la trajectoire
             } else { // Simple mouvement
-                resultat.push([dr, dc]);
+                resultat.push({ r: dr, c: dc });
             }
             dr += mvt[0];
             dc += mvt[1];
@@ -255,9 +281,9 @@ function calculeMouvementsReine(r, c) {
     return mvtsFou.concat(mvtsTour);
 }
 
-function calculeMouvementsOrigine(r, c) {
+function calculeMouvementsOrigine(r: number, c: number) {
     const piece = plateau[r][c].piece;
-    var resultat = [];
+    var resultat: Position[] = [];
     switch (piece.type) {
         case PION:
             resultat = calculeMouvementsPion(r, c);
@@ -282,15 +308,16 @@ function calculeMouvementsOrigine(r, c) {
 }
 
 function calculeMouvements() {
-    for (possibilite of mvtsPossibles[joueurActif]) {
-        possibilite.destinations = calculeMouvementsOrigine(...(possibilite.origine));
+    const possibles: MouvementPossible[] = mvtsPossibles[joueurActif];
+    for (const mouvement of possibles) {
+        mouvement.destinations = calculeMouvementsOrigine(mouvement.origine.r, mouvement.origine.c);
     }
 }
 
 function origineAutorisee(r, c) {
-    const cases = mvtsPossibles[joueurActif];
+    const cases: MouvementPossible[] = mvtsPossibles[joueurActif];
     for (let i = 0; i < cases.length; i++) {
-        if (cases[i].origine[0] === r && cases[i].origine[1] === c && cases[i].destinations.length) {
+        if (cases[i].origine.r === r && cases[i].origine.c === c && cases[i].destinations.length) {
             indexOrigine = i;
             return true;
             break;
@@ -300,9 +327,9 @@ function origineAutorisee(r, c) {
 }
 
 function destinationAutorisee(dr, dc) {
-    const destinations = mvtsPossibles[joueurActif][indexOrigine].destinations;
+    const destinations: Position[] = mvtsPossibles[joueurActif][indexOrigine].destinations;
     for (let i = 0; i < destinations.length; i++) {
-        if (destinations[i][0] === dr && destinations[i][1] === dc) {
+        if (destinations[i].r === dr && destinations[i].c === dc) {
             return true;
             break;
         }
@@ -321,7 +348,7 @@ function onClick(evt) {
                 origine: {r: selection.r, c:selection.c, piece: selection.piece},
                 destination: {r: caseChoisie.r, c: caseChoisie.c, piece: caseChoisie.piece}
             });
-            document.getElementById("btnAnnule").disabled = false;
+            disableBtnAnnule(false);
             const adversaire = (joueurActif === BLANC)?NOIR:BLANC;
             retireOrigine(joueurActif, selection.r, selection.c);
             if (caseChoisie.piece) retireOrigine(adversaire, caseChoisie.r, caseChoisie.c);
@@ -347,6 +374,7 @@ function onClick(evt) {
 
 function onAnnule() {
     const mouvement = historique.pop();
+    if (mouvement == null) return;
     const orig = mouvement.origine; // {row, col, piece}
     const dst = mouvement.destination;
     const couleur = orig.piece.couleur;
@@ -379,7 +407,9 @@ function onAnnule() {
     joueurActif = (joueurActif === BLANC)?NOIR:BLANC;
     calculeMouvements();
     showStatus();
-    if (historique.length === 0) document.getElementById("btnAnnule").disabled = true;
+    if (historique.length === 0) {
+        disableBtnAnnule(true);
+    }
 }
 
 function onNouveau() {
@@ -387,21 +417,17 @@ function onNouveau() {
 }
 
 function drawPiece(p, r, c) {
+    let id: number;
     if (p.couleur === NOIR) id = 2 * p.type;
     else id = 2 * p.type + 1;
     context.drawImage(img[id], c * size, r * size, size * 0.95, size * 0.95);
 }
 
 function drawSelection(r, c) {
+    let id: number;
     if (plateau[r][c].noir) id = 2 * VISEUR + 1;
     else id = 2 * VISEUR;
     context.drawImage(img[id], c * size, r * size, size * 0.95, size * 0.95);
-}
-
-function Case(r, c, noir) {
-    this.r = r;
-    this.c = c;
-    this.noir = noir;
 }
 
 function Piece(type, couleur) {
@@ -412,12 +438,12 @@ function Piece(type, couleur) {
 function initPlateau() {
     mvtsPossibles[NOIR] = [];
     mvtsPossibles[BLANC] = [];
-    var plateau = new Array();
+    var plateau: Case[][] = [];
     var currentNoir = false;
     for (var r = 0; r < 8; r++) {
         plateau[r] = new Array();
         for (var c = 0; c < 8; c++) {
-            plateau[r][c] = new Case(r, c, currentNoir);
+            plateau[r][c] = {r, c, noir: currentNoir};
             currentNoir = !currentNoir;
         }
         currentNoir = !currentNoir;
@@ -475,26 +501,27 @@ function initialise() {
     canvas.width = size * 8;
     canvas.height = size * 8;
     context = canvas.getContext('2d');
-    const btn = document.getElementById("btnAnnule");
+    let btn: HTMLButtonElement;
+    btn = document.getElementById("btnAnnule") as HTMLButtonElement;
     btn.disabled = true;
     btn.addEventListener('click', onAnnule);
-    document.getElementById("btnNouveau").addEventListener('click', onNouveau);
+    btn = document.getElementById("btnNouveau") as HTMLButtonElement;
+    btn.addEventListener('click', onNouveau);
 }
 
 // Function that formats the string with HTML tags, then outputs the result
 function showHistory(data) {
     var output = "<ul>"; // Open list
-    var i;
     
     // Loop through the moves, and add them as list items
-    for (var i in data.artists) {
+    for (const i in data.artists) {
         output += "<li>" + data.artists[i].artistname + " (Born: " + data.artists[i].born + ")</li>"; 
     }
     
     output += "</ul>"; // Close list
 
     // Output the data to the "artistlist" element
-    document.getElementById("artistList").innerHTML = output;
+    (document.getElementById("artistList") as HTMLButtonElement).innerHTML = output;
 }
 
 // Store XMLHttpRequest and the JSON file location in variables
