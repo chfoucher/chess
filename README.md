@@ -33,3 +33,7 @@ Les informations sont mémorisées dans une BDD MySQL.
 
 ## Test automatique
 Les tests automatiques sont réalisés par un script node.js écrit en typescript.
+
+## Documentation
+Le support markdown de GH permet d'implémenter un wiki (en une ou plusieurs pages).
+
